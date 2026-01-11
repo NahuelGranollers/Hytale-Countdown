@@ -4,6 +4,7 @@ import CountdownTimer from './components/CountdownTimer';
 import ProgressBar from './components/ProgressBar';
 import FloatingWidget from './components/FloatingWidget';
 import BackgroundParticles from './components/BackgroundParticles';
+import useDynamicFavicon from './hooks/useDynamicFavicon';
 import { TRANSLATIONS, TARGET_DATE_ISO, START_DATE_ISO } from './constants';
 import { CountDownTime, Language, Theme } from './types';
 import { Twitter, Youtube, Instagram, Gamepad2 } from 'lucide-react';
@@ -120,6 +121,9 @@ const App: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // 4. Dynamic Interactive Favicon
+  useDynamicFavicon({ timeLeft, progress });
+
   return (
     <div className={`${theme} font-sans`}>
         {/* Force full height (100dvh) and hide overflow to prevent scrolling */}
@@ -150,8 +154,8 @@ const App: React.FC = () => {
 
             <Navbar t={t} lang={lang} toggleLang={toggleLang} />
 
-            {/* Floating Widget - Always on top */}
-            <FloatingWidget timeLeft={timeLeft} t={t} />
+            {/* Floating Widget - Always on top. Passing lang for popup sync. */}
+            <FloatingWidget timeLeft={timeLeft} t={t} lang={lang} />
 
             {/* Main Content - Flex Column with Justify Evenly to distribute space automatically */}
             <main className="relative z-10 flex-1 flex flex-col items-center justify-evenly px-4 w-full max-w-[1920px] mx-auto pt-14 md:pt-20 pb-2 md:pb-4 h-full">

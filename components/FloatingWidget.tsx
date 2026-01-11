@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, GripHorizontal, Maximize2 } from 'lucide-react';
+import { X, GripHorizontal, Maximize2, ExternalLink } from 'lucide-react';
 import { CountDownTime, Translation } from '../types';
 
 interface FloatingWidgetProps {
   timeLeft: CountDownTime;
   t: Translation;
+  lang: string;
 }
 
-const FloatingWidget: React.FC<FloatingWidgetProps> = ({ timeLeft, t }) => {
+const FloatingWidget: React.FC<FloatingWidgetProps> = ({ timeLeft, t, lang }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   // Position state: null means default CSS position (bottom-right)
@@ -33,13 +34,21 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ timeLeft, t }) => {
     localStorage.removeItem('hytale_widget_closed');
   };
 
+  const openPopup = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}${window.location.pathname}?mode=popup&lang=${lang}`;
+    // Features: width/height + minimal chrome + alwaysRaised (legacy support)
+    const features = 'width=320,height=160,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=no,alwaysRaised=yes,top=100,left=100';
+    window.open(url, 'HytaleTimerPopup', features);
+  };
+
   // --- Drag Logic ---
   
   const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
     if (!widgetRef.current) return;
     
-    // Prevent dragging if clicking close button
-    if ((e.target as HTMLElement).closest('.close-btn')) return;
+    // Prevent dragging if clicking buttons
+    if ((e.target as HTMLElement).closest('button')) return;
 
     setIsDragging(true);
     
@@ -99,8 +108,6 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ timeLeft, t }) => {
 
 
   if (!isVisible) {
-      // Optional: A tiny trigger to bring it back if needed, or just keep it hidden per requirements.
-      // For UX, often good to have a way to restore. Adding a tiny trigger bottom left.
       return (
           <button 
             onClick={handleRestore}
@@ -143,12 +150,21 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ timeLeft, t }) => {
             <GripHorizontal size={14} />
             <span className="text-[9px] font-display font-bold tracking-widest uppercase text-[#00bcf2]">Hytale Launch</span>
          </div>
-         <button 
-            onClick={handleClose}
-            className="close-btn text-gray-400 hover:text-red-400 transition-colors p-0.5 rounded hover:bg-white/5"
-         >
-            <X size={14} />
-         </button>
+         <div className="flex items-center gap-1">
+            <button 
+                onClick={openPopup}
+                className="text-gray-400 hover:text-[#00bcf2] transition-colors p-0.5 rounded hover:bg-white/5"
+                title="Popout Window"
+            >
+                <ExternalLink size={12} />
+            </button>
+            <button 
+                onClick={handleClose}
+                className="close-btn text-gray-400 hover:text-red-400 transition-colors p-0.5 rounded hover:bg-white/5"
+            >
+                <X size={14} />
+            </button>
+         </div>
       </div>
 
       {/* Content */}
