@@ -23,12 +23,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          # Cache removed because package-lock.json might not exist yet
+          
       - name: Install dependencies
-        # Changed from 'npm ci' to 'npm install' because package-lock.json might be missing
         run: npm install
+        
       - name: Build
         run: npm run build
+        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
