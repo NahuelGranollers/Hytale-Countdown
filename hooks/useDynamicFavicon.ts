@@ -18,73 +18,69 @@ const useDynamicFavicon = ({ timeLeft, progress }: UseDynamicFaviconProps) => {
     // --- Configuration ---
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const radius = 26; // Leave space for stroke
-    const lineWidth = 6;
+    const radius = 30; 
     
     // Hytale Colors
-    const colorBg = '#151720';
-    const colorRingBase = '#2c3e50';
-    const colorRingProgress = timeLeft.days === 0 ? '#ffc107' : '#00bcf2'; // Gold if < 24h, else Blue
-    const colorText = '#ffffff';
+    const colorBg = '#0d1016'; // Darker bg for contrast
+    const colorText = '#ffffff'; // High contrast white
+    const colorAlert = '#ffc107'; // Gold
 
     // 1. Clear Canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 2. Draw Background Circle (Dark)
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius + lineWidth/2, 0, 2 * Math.PI);
-    ctx.fillStyle = colorBg;
-    ctx.fill();
-
-    // 3. Draw Ring Background (Dimmed)
+    // 2. Background (Circle) - Maximized
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.strokeStyle = colorRingBase;
-    ctx.lineWidth = lineWidth;
+    ctx.fillStyle = colorBg;
+    ctx.fill();
+    
+    // Optional: Subtle border to distinguish from browser tab color
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = timeLeft.days < 1 ? colorAlert : '#00bcf2';
     ctx.stroke();
 
-    // 4. Draw Progress Ring
-    // Start from top (-Math.PI/2)
-    const startAngle = -Math.PI / 2;
-    // Calculate end angle based on progress (0 to 100)
-    const endAngle = startAngle + (Math.PI * 2 * (progress / 100));
-
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, startAngle, endAngle, false);
-    ctx.strokeStyle = colorRingProgress;
-    ctx.lineWidth = lineWidth;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-
-    // 5. Draw Text (Days Left)
+    // 3. Draw Text (MASSIVE Digits)
     ctx.fillStyle = colorText;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
     // Logic for text display
     let textToDraw = timeLeft.days.toString();
+    let fontSize = 42;
     
     if (timeLeft.days > 999) {
-        ctx.font = 'bold 18px "Open Sans", sans-serif';
-        textToDraw = "999+";
+        textToDraw = "999";
+        fontSize = 28;
     } else if (timeLeft.days > 99) {
-        ctx.font = 'bold 20px "Open Sans", sans-serif';
-    } else if (timeLeft.days > 0) {
-        ctx.font = 'bold 26px "Open Sans", sans-serif';
-    } else {
+        fontSize = 34; // 3 digits
+    } else if (timeLeft.days === 0) {
         // Less than 1 day
         if (timeLeft.hours > 0) {
-             ctx.font = 'bold 24px "Open Sans", sans-serif';
              textToDraw = `${timeLeft.hours}h`;
+             fontSize = 32;
+             ctx.fillStyle = colorAlert;
         } else {
-             ctx.font = 'bold 32px "Open Sans", sans-serif';
              textToDraw = "!";
+             fontSize = 52;
+             ctx.fillStyle = colorAlert;
         }
+    } else {
+        // Standard 1 or 2 digits -> Make it HUGE
+        fontSize = 48;
     }
 
-    ctx.fillText(textToDraw, centerX, centerY + 2); // +2 for optical alignment
+    // Use a very heavy font stack
+    ctx.font = `900 ${fontSize}px "Arial Black", "Roboto Black", "Impact", sans-serif`;
+    
+    // Slight shadow for legibility
+    ctx.shadowColor = "rgba(0,0,0,0.8)";
+    ctx.shadowBlur = 4;
 
-    // 6. Update Favicon Link
+    // Optical vertical alignment adjustments based on font
+    const yOffset = fontSize > 40 ? 4 : 2; 
+    ctx.fillText(textToDraw, centerX, centerY + yOffset);
+
+    // 4. Update Favicon Link
     const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
     if (link) {
       link.href = canvas.toDataURL('image/png');
@@ -95,7 +91,7 @@ const useDynamicFavicon = ({ timeLeft, progress }: UseDynamicFaviconProps) => {
       document.head.appendChild(newLink);
     }
 
-  }, [timeLeft.days, timeLeft.hours, progress]); // Only update when meaningful data changes
+  }, [timeLeft.days, timeLeft.hours]); 
 };
 
 export default useDynamicFavicon;
