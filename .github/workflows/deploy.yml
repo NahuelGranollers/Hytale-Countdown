@@ -25,7 +25,8 @@ jobs:
           node-version: 20
           cache: 'npm'
       - name: Install dependencies
-        run: npm ci
+        # Changed from 'npm ci' to 'npm install' because package-lock.json might be missing
+        run: npm install
       - name: Build
         run: npm run build
       - name: Upload artifact
