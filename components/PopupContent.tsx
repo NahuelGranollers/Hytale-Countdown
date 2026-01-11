@@ -18,47 +18,42 @@ const PopupContent: React.FC<PopupContentProps> = ({ timeLeft, t, onClose, isPip
     
     return (
         <div className="bg-black w-full h-full flex flex-col items-center justify-center overflow-hidden select-none cursor-default">
-            {/* Main Digits Container - Scales with viewport width */}
-            <div className="flex items-center justify-center gap-[1vw] w-full px-2">
+            {/* Main Digits Container - Scales with viewport width. nowrap ensures single line. */}
+            <div className="flex flex-nowrap items-baseline justify-center gap-[0.5vw] w-full h-full pt-2">
                 
                 {/* DAYS */}
-                <div className="flex flex-col items-center">
-                     <span className="text-[14vw] font-bold text-white leading-none tracking-tight font-sans">
+                <div className="flex justify-center w-[18vw]">
+                     <span className="text-[12vw] font-bold text-white leading-none tracking-tighter font-mono tabular-nums">
                         {f(timeLeft.days)}
                      </span>
                 </div>
 
-                <span className="text-[8vw] font-bold text-gray-600 pb-[1vw]">:</span>
+                <span className="text-[8vw] font-bold text-[#333] leading-none relative -top-[1vw]">:</span>
 
                 {/* HOURS */}
-                 <div className="flex flex-col items-center">
-                     <span className="text-[14vw] font-bold text-white leading-none tracking-tight font-sans">
+                 <div className="flex justify-center w-[18vw]">
+                     <span className="text-[12vw] font-bold text-white leading-none tracking-tighter font-mono tabular-nums">
                         {f(timeLeft.hours)}
                      </span>
                 </div>
 
-                <span className="text-[8vw] font-bold text-gray-600 pb-[1vw]">:</span>
+                <span className="text-[8vw] font-bold text-[#333] leading-none relative -top-[1vw]">:</span>
 
                 {/* MINUTES */}
-                 <div className="flex flex-col items-center">
-                     <span className="text-[14vw] font-bold text-white leading-none tracking-tight font-sans">
+                 <div className="flex justify-center w-[18vw]">
+                     <span className="text-[12vw] font-bold text-white leading-none tracking-tighter font-mono tabular-nums">
                         {f(timeLeft.minutes)}
                      </span>
                 </div>
 
-                <span className="text-[8vw] font-bold text-gray-600 pb-[1vw]">:</span>
+                <span className="text-[8vw] font-bold text-[#333] leading-none relative -top-[1vw]">:</span>
 
                 {/* SECONDS (Gold Highlight) */}
-                 <div className="flex flex-col items-center">
-                     <span className="text-[14vw] font-bold text-[#ffc107] leading-none tracking-tight font-sans tabular-nums">
+                 <div className="flex justify-center w-[18vw]">
+                     <span className="text-[12vw] font-bold text-[#ffc107] leading-none tracking-tighter font-mono tabular-nums">
                         {f(timeLeft.seconds)}
                      </span>
                 </div>
-            </div>
-            
-            {/* Tiny Label at bottom to indicate what this window is (optional, very subtle) */}
-            <div className="absolute bottom-2 text-[2vw] text-gray-600 font-bold uppercase tracking-[0.5em] opacity-50">
-                Hytale Launch
             </div>
         </div>
     );
