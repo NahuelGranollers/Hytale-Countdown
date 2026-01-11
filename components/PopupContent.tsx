@@ -11,6 +11,61 @@ interface PopupContentProps {
 }
 
 const PopupContent: React.FC<PopupContentProps> = ({ timeLeft, t, onClose, isPip }) => {
+  
+  // --- SUPER MINIMALIST MODE (For Picture-in-Picture) ---
+  if (isPip) {
+    const f = (n: number) => n.toString().padStart(2, '0');
+    
+    return (
+        <div className="bg-black w-full h-full flex flex-col items-center justify-center overflow-hidden select-none cursor-default">
+            {/* Main Digits Container - Scales with viewport width */}
+            <div className="flex items-center justify-center gap-[1vw] w-full px-2">
+                
+                {/* DAYS */}
+                <div className="flex flex-col items-center">
+                     <span className="text-[14vw] font-bold text-white leading-none tracking-tight font-sans">
+                        {f(timeLeft.days)}
+                     </span>
+                </div>
+
+                <span className="text-[8vw] font-bold text-gray-600 pb-[1vw]">:</span>
+
+                {/* HOURS */}
+                 <div className="flex flex-col items-center">
+                     <span className="text-[14vw] font-bold text-white leading-none tracking-tight font-sans">
+                        {f(timeLeft.hours)}
+                     </span>
+                </div>
+
+                <span className="text-[8vw] font-bold text-gray-600 pb-[1vw]">:</span>
+
+                {/* MINUTES */}
+                 <div className="flex flex-col items-center">
+                     <span className="text-[14vw] font-bold text-white leading-none tracking-tight font-sans">
+                        {f(timeLeft.minutes)}
+                     </span>
+                </div>
+
+                <span className="text-[8vw] font-bold text-gray-600 pb-[1vw]">:</span>
+
+                {/* SECONDS (Gold Highlight) */}
+                 <div className="flex flex-col items-center">
+                     <span className="text-[14vw] font-bold text-[#ffc107] leading-none tracking-tight font-sans tabular-nums">
+                        {f(timeLeft.seconds)}
+                     </span>
+                </div>
+            </div>
+            
+            {/* Tiny Label at bottom to indicate what this window is (optional, very subtle) */}
+            <div className="absolute bottom-2 text-[2vw] text-gray-600 font-bold uppercase tracking-[0.5em] opacity-50">
+                Hytale Launch
+            </div>
+        </div>
+    );
+  }
+
+
+  // --- HIGH TECH MODE (For Standard Popup / Fallback) ---
   return (
     <div className="bg-[#0b0e14] w-full h-full flex flex-col relative overflow-hidden select-none font-sans">
       
@@ -69,7 +124,7 @@ const PopupContent: React.FC<PopupContentProps> = ({ timeLeft, t, onClose, isPip
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#00bcf2] blur-[80px] opacity-[0.05] rounded-full pointer-events-none"></div>
             
             {/* The Timer - Scaled */}
-            <div className={`transform transition-transform duration-300 origin-center ${isPip ? 'scale-110 sm:scale-125' : 'scale-125'}`}>
+            <div className={`transform transition-transform duration-300 origin-center scale-125`}>
                  <CountdownTimer timeLeft={timeLeft} t={t} />
             </div>
             
