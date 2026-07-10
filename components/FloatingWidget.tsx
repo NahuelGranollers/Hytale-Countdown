@@ -42,31 +42,28 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ timeLeft, t, lang }) =>
   const openPopup = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    // Strategy 1: Document Picture-in-Picture API (True "Always on Top" + No URL)
-    // We must check if we are in the top-level window, as PiP is blocked in iframes.
+    // Strategy 1: Document Picture-in-Picture API
     const isTopLevel = window.self === window.top;
 
-    // @ts-ignore - Types might not be fully available in all TS environments yet
+    // @ts-ignore
     if (isTopLevel && 'documentPictureInPicture' in window) {
         try {
             // @ts-ignore
             const pip = await window.documentPictureInPicture.requestWindow({
                 width: 380,
-                height: 200,
+                height: 180,
             });
 
-            // Copy all styles from the main window to the PiP window
             [...document.head.querySelectorAll('style, link[rel="stylesheet"]')].forEach((style) => {
                 pip.document.head.appendChild(style.cloneNode(true));
             });
 
-            // Handle PiP closing
             pip.addEventListener('pagehide', () => {
                 setPipWindow(null);
             });
 
             setPipWindow(pip);
-            return; // Success
+            return;
         } catch (error) {
             console.error('PiP failed, falling back to window.open', error);
         }
@@ -136,18 +133,16 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ timeLeft, t, lang }) =>
   }, [isDragging]);
 
 
-  // If not visible button
   if (!isVisible) {
       return (
           <>
             <button 
                 onClick={handleRestore}
-                className="fixed bottom-4 left-4 z-[9999] p-2 bg-[#151720]/80 backdrop-blur-md border border-[#ffc107]/30 rounded-full text-[#ffc107] hover:scale-110 transition-transform shadow-lg"
+                className="fixed bottom-4 left-4 z-[9999] p-3 bg-[#151720] border border-white/10 rounded-full text-[#00bcf2] hover:scale-110 transition-transform shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
                 title="Show Timer"
             >
-                <Maximize2 size={16} />
+                <Maximize2 size={20} />
             </button>
-            {/* If PiP is active, we still render the content via portal even if main widget is hidden/minimized */}
             {pipWindow && createPortal(
                 <PopupContent 
                     timeLeft={timeLeft} 
@@ -172,79 +167,89 @@ const FloatingWidget: React.FC<FloatingWidgetProps> = ({ timeLeft, t, lang }) =>
         style={{
             left: position ? `${position.x}px` : undefined,
             top: position ? `${position.y}px` : undefined,
-            bottom: position ? undefined : '1.5rem', 
-            right: position ? undefined : '1.5rem',
-            cursor: isDragging ? 'grabbing' : 'grab',
+            bottom: position ? undefined : '2rem', 
+            right: position ? undefined : '2rem',
             touchAction: 'none'
         }}
         className={`
-            fixed z-[9999] w-auto min-w-[240px] select-none
-            bg-[#0d1016]/85 backdrop-blur-xl
-            border border-[#ffc107]/20 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.5)]
-            transition-shadow duration-300
-            ${isDragging ? 'scale-105 shadow-[0_8px_30px_rgba(0,188,242,0.3)]' : 'hover:shadow-[0_4px_25px_rgba(0,0,0,0.6)]'}
+            fixed z-[9999] w-auto min-w-[320px] select-none
+            bg-[#0b0e14] 
+            border border-[#1f2937] rounded-lg shadow-2xl
+            transition-all duration-200
+            ${isDragging ? 'cursor-grabbing shadow-[0_0_50px_rgba(0,0,0,0.6)] scale-[1.02]' : 'cursor-grab hover:shadow-[0_0_30px_rgba(0,0,0,0.4)]'}
             overflow-hidden animate-fade-in-down
         `}
         >
-        {/* Header */}
-        <div className="flex items-center justify-between px-3 py-1.5 bg-gradient-to-r from-[#151720] to-[#1a1d26] border-b border-white/5">
-            <div className="flex items-center gap-2 text-gray-400">
-                <GripHorizontal size={14} />
-                <span className="text-[9px] font-display font-bold tracking-widest uppercase text-[#00bcf2]">
-                    {pipWindow ? 'External Window' : 'Hytale Launch'}
+        {/* Header - Dark grey background, cyan text */}
+        <div className="flex items-center justify-between px-4 py-3 bg-[#151720] border-b border-white/5">
+            <div className="flex items-center gap-3">
+                {/* 2x3 Grid Dots Simulation using Lucide */}
+                <GripHorizontal size={18} className="text-gray-500 opacity-60" />
+                <span className="font-display font-bold text-[11px] tracking-[0.2em] text-[#00bcf2] uppercase pt-0.5">
+                    {pipWindow ? 'EXTERNAL WINDOW' : 'HYTALE LAUNCH'}
                 </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-3">
                 <button 
                     onClick={openPopup}
-                    className="text-gray-400 hover:text-[#00bcf2] transition-colors p-0.5 rounded hover:bg-white/5"
+                    className="text-gray-500 hover:text-[#00bcf2] transition-colors"
                     title={pipWindow ? "Focus Window" : "Popout Window"}
                 >
-                    <ExternalLink size={12} />
+                    <ExternalLink size={16} />
                 </button>
                 <button 
                     onClick={handleClose}
-                    className="close-btn text-gray-400 hover:text-red-400 transition-colors p-0.5 rounded hover:bg-white/5"
+                    className="text-gray-500 hover:text-white transition-colors"
                 >
-                    <X size={14} />
+                    <X size={18} />
                 </button>
             </div>
         </div>
 
-        {/* Local Widget Content */}
+        {/* Content - Pitch dark background, white text, yellow labels */}
         {!pipWindow ? (
-            <div className="px-4 py-3 flex items-center justify-center gap-3">
-                <div className="flex flex-col items-center">
-                    <span className="font-mono text-xl md:text-2xl font-bold text-white drop-shadow-md">{format(timeLeft.days)}</span>
-                    <span className="text-[8px] text-[#ffc107] font-bold uppercase tracking-wider">{t.time.days.substring(0, 1)}</span>
-                </div>
-                <span className="text-gray-600 font-bold mb-3">:</span>
-                <div className="flex flex-col items-center">
-                    <span className="font-mono text-xl md:text-2xl font-bold text-white drop-shadow-md">{format(timeLeft.hours)}</span>
-                    <span className="text-[8px] text-[#ffc107] font-bold uppercase tracking-wider">{t.time.hours.substring(0, 1)}</span>
-                </div>
-                <span className="text-gray-600 font-bold mb-3">:</span>
-                <div className="flex flex-col items-center">
-                    <span className="font-mono text-xl md:text-2xl font-bold text-white drop-shadow-md">{format(timeLeft.minutes)}</span>
-                    <span className="text-[8px] text-[#ffc107] font-bold uppercase tracking-wider">{t.time.minutes.substring(0, 1)}</span>
-                </div>
-                <span className="text-gray-600 font-bold mb-3">:</span>
-                <div className="flex flex-col items-center">
-                    <span className="font-mono text-xl md:text-2xl font-bold text-white drop-shadow-md w-8 text-center">{format(timeLeft.seconds)}</span>
-                    <span className="text-[8px] text-[#ffc107] font-bold uppercase tracking-wider">{t.time.seconds.substring(0, 1)}</span>
+            <div className="px-6 py-5 bg-[#080a0f]">
+                <div className="flex items-start justify-center gap-4">
+                    {/* Days */}
+                    <div className="flex flex-col items-center gap-2">
+                        <span className="font-sans font-bold text-3xl md:text-4xl text-white leading-none tracking-wide drop-shadow-sm">{format(timeLeft.days)}</span>
+                        <span className="font-bold text-[10px] text-[#ffc107] uppercase leading-none">{t.time.days.substring(0, 1)}</span>
+                    </div>
+
+                    <div className="text-gray-700 font-bold text-2xl leading-none mt-1 opacity-50">:</div>
+
+                    {/* Hours */}
+                    <div className="flex flex-col items-center gap-2">
+                        <span className="font-sans font-bold text-3xl md:text-4xl text-white leading-none tracking-wide drop-shadow-sm">{format(timeLeft.hours)}</span>
+                        <span className="font-bold text-[10px] text-[#ffc107] uppercase leading-none">{t.time.hours.substring(0, 1)}</span>
+                    </div>
+
+                    <div className="text-gray-700 font-bold text-2xl leading-none mt-1 opacity-50">:</div>
+
+                    {/* Minutes */}
+                    <div className="flex flex-col items-center gap-2">
+                        <span className="font-sans font-bold text-3xl md:text-4xl text-white leading-none tracking-wide drop-shadow-sm">{format(timeLeft.minutes)}</span>
+                        <span className="font-bold text-[10px] text-[#ffc107] uppercase leading-none">{t.time.minutes.substring(0, 1)}</span>
+                    </div>
+
+                    <div className="text-gray-700 font-bold text-2xl leading-none mt-1 opacity-50">:</div>
+
+                    {/* Seconds */}
+                    <div className="flex flex-col items-center gap-2">
+                        <span className="font-sans font-bold text-3xl md:text-4xl text-white leading-none tracking-wide drop-shadow-sm tabular-nums">{format(timeLeft.seconds)}</span>
+                        <span className="font-bold text-[10px] text-[#ffc107] uppercase leading-none">{t.time.seconds.substring(0, 1)}</span>
+                    </div>
                 </div>
             </div>
         ) : (
-             <div className="px-4 py-6 text-center">
-                 <p className="text-[#00bcf2] text-xs font-bold uppercase tracking-wider animate-pulse">Running in External Window</p>
+             <div className="px-6 py-8 text-center bg-[#080a0f]">
+                 <div className="inline-block px-3 py-1 border border-[#00bcf2]/30 rounded text-[#00bcf2] text-[10px] font-bold uppercase tracking-widest animate-pulse">
+                    Running Externally
+                 </div>
              </div>
         )}
-        
-        {/* Decorative Bottom Line */}
-        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-[#ffc107]/50 to-transparent"></div>
         </div>
 
-        {/* Portal to PiP Window */}
         {pipWindow && createPortal(
             <PopupContent 
                 timeLeft={timeLeft} 
